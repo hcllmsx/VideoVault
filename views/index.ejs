@@ -1,0 +1,18 @@
+<% Object.entries(videoGroups).forEach(([groupName, videos]) => { %>
+    <div class="video-section">
+        <h2 class="group-header"><%= groupName %></h2>
+        <div class="video-list">
+            <% videos.forEach(video => { %>
+                <div class="video-item">
+                    <div class="video-info">
+                        <h3 class="video-title"><%= video.title %></h3>
+                        <p class="video-description"><%= video.description %></p>
+                    </div>
+                    <a href="/<%= video.slug %>" class="watch-button">
+                        观看视频
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+<% }); %>

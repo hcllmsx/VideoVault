@@ -1,0 +1,23 @@
+{
+  "name": "video-vault",
+  "version": "1.0.0",
+  "description": "A video showcase website using 123 Cloud Storage",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["video", "123 Cloud Storage", "Vercel"],
+  "author": "hcllmsx",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ejs": "^3.1.6",
+    "express-ejs-layouts": "^2.5.1",
+    "dotenv": "^10.0.0",
+    "crypto-js": "^4.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}

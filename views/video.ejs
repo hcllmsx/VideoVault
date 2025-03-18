@@ -1,0 +1,49 @@
+<div class="video-wrapper">
+    <div class="video-container">
+        <video id="videoPlayer" controls autoplay controlsList="nodownload" oncontextmenu="return false;"<% if (video.cover) { %> poster="<%= video.cover %>"<% } %>>
+            <source src="<%= video.signedUrl %>" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</div>
+
+<div class="video-content">
+    <h1><%= video.title %></h1>
+    <p><%= video.description %></p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('videoPlayer');
+        
+        function adjustVideoSize() {
+            if (!video.videoWidth || !video.videoHeight) return;
+            
+            const maxWidth = Math.min(1280, window.innerWidth);
+            const maxHeight = 720;
+            const videoRatio = video.videoWidth / video.videoHeight;
+            
+            let width = video.videoWidth;
+            let height = video.videoHeight;
+            
+            if (width > maxWidth) {
+                width = maxWidth;
+                height = width / videoRatio;
+            }
+            
+            if (height > maxHeight) {
+                height = maxHeight;
+                width = height * videoRatio;
+            }
+            
+            video.style.width = '100%';
+            video.style.maxWidth = `${width}px`;
+            video.style.height = 'auto';
+        }
+
+        video.addEventListener('loadedmetadata', adjustVideoSize);
+        window.addEventListener('resize', adjustVideoSize);
+        
+        if (video.readyState >= 1) adjustVideoSize();
+    });
+</script>
