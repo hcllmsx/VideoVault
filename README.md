@@ -34,10 +34,7 @@ VideoVault 是一个基于 123云盘的视频直链展示网站，支持视频�
 
 示例：
 ```json
-{
-  "logo": "https://example.com/logo.png",
-  "name": "My Video Site"
-}
+{"logo":"https://example.com/logo.png","name":"My Video Site"}
 ```
 
 视频配置可以通过以下两种方式之一进行：
