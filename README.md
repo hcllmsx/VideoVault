@@ -75,8 +75,8 @@ VideoVault 是一个基于 123云盘的视频直链展示网站，支持视频�
 
 1. 克隆仓库：
    \`\`\`bash
-   git clone https://github.com/hcllmsx/video-vault.git
-   cd video-vault
+   git clone https://github.com/hcllmsx/VideoVault.git
+   cd VideoVault
    \`\`\`
 2. 安装依赖：
    \`\`\`bash
