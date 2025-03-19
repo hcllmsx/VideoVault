@@ -74,7 +74,7 @@ function parseVideosConfig() {
       title: '未命名视频',
       description: '暂无描述',
       group: '默认分组',
-      cover: '' // 新增封面字段，默认为空字符串
+      cover: '/media/VideoVault-standby.webp' // 默认封面
     };
     const video = { ...defaultVideo, ...videoConfig };
     if (!video.url || !video.slug) {
