@@ -13,7 +13,7 @@
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22><%= typeof isVideoPage !== 'undefined' && isVideoPage ? '📷' : '❤️' %></text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
     <style>
         :root {
             --primary-color: #333;
@@ -234,9 +234,15 @@
         <nav class="navbar">
             <div class="container">
                 <a href="/" class="navbar-brand">
-                    <% if (process.env.SITE_BRAND) { %>
-                        <img src="<%= JSON.parse(process.env.SITE_BRAND).logo %>" alt="Logo" width="24" height="24" style="margin-right: 0.5rem;">
-                        <%= JSON.parse(process.env.SITE_BRAND).name %>
+                    <% if (siteBrand) { %>
+                        <% if (siteBrand.logo && siteBrand.name) { %>
+                            <img src="<%= siteBrand.logo %>" alt="Logo" width="24" height="24" style="margin-right: 0.5rem;">
+                            <span style="color: #fd7e0d;"><%= siteBrand.name %></span>
+                        <% } else if (siteBrand.logo) { %>
+                            <img src="<%= siteBrand.logo %>" alt="Logo" width="24" height="24">
+                        <% } else if (siteBrand.name) { %>
+                            <span style="color: #fd7e0d;"><%= siteBrand.name %></span>
+                        <% } %>
                     <% } else { %>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ff0000"/>
@@ -254,7 +260,7 @@
         </div>
 
         <footer class="footer">
-            <p>&copy; <%= new Date().getFullYear() %> <% if (process.env.SITE_BRAND) { %><%= JSON.parse(process.env.SITE_BRAND).name %><% } else { %><a href="https://github.com/hcllmsx/VideoVault" style="color: inherit; text-decoration: none; font-weight: bold;">VideoVault</a><% } %>. All rights reserved.</p>
+            <p>&copy; <%= new Date().getFullYear() %> <% if (siteBrand && siteBrand.name) { %><%= siteBrand.name %><% } else { %><a href="https://github.com/hcllmsx/VideoVault" style="color: inherit; text-decoration: none; font-weight: bold;">VideoVault</a><% } %>. All rights reserved.</p>
         </footer>
     </div>
 
