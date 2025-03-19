@@ -1,11 +1,26 @@
 <div class="video-wrapper">
     <div class="video-container">
         <% if (!video.cover.startsWith('http')) { %>
-            <!-- 默认封面使用动态图片 -->
-            <div id="coverContainer" class="default-cover" style="position: relative; width: 100%; cursor: pointer; background-image: url('<%= video.cover %>'); background-size: contain; background-position: center; background-repeat: no-repeat;">
-                <!-- 占位 div 用于保持宽高比 16:9 -->
-                <div style="width: 100%; padding-top: 56.25%;"></div>
-                <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); border-radius: 50%; padding: 20px; transition: transform 0.3s ease;">
+            <!-- 使用两种方式显示动态封面，用于测试 -->
+            <div id="coverContainer" style="position: relative; width: 100%; cursor: pointer;">
+                <!-- 方式1: 使用 img 标签 -->
+                <div style="position: relative;">
+                    <img id="coverImage" src="<%= video.cover %>" alt="Video Cover" style="width: 100%; height: auto; display: block;">
+                    <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 12px;">
+                        img 标签显示
+                    </div>
+                </div>
+                
+                <!-- 方式2: 使用背景图片 -->
+                <div id="coverBackground" style="margin-top: 20px; width: 100%; position: relative;">
+                    <div style="width: 100%; padding-top: 56.25%; background-image: url('<%= video.cover %>'); background-size: contain; background-position: center; background-repeat: no-repeat;"></div>
+                    <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 12px;">
+                        background-image 显示
+                    </div>
+                </div>
+
+                <!-- 播放按钮，覆盖在两个测试区域上方 -->
+                <div class="play-button" style="position: fixed; top: 50%; right: 20px; transform: translateY(-50%); background: rgba(0,0,0,0.7); border-radius: 50%; padding: 20px; transition: transform 0.3s ease; z-index: 1000;">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="#ffffff">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
@@ -26,20 +41,59 @@
 </div>
 
 <style>
-.default-cover {
+#coverContainer {
     background-color: #000;
-    image-rendering: -webkit-optimize-contrast; /* 优化 WebP 渲染 */
-    image-rendering: crisp-edges;
-}
-
-#coverContainer:hover .play-button {
-    transform: translate(-50%, -50%) scale(1.1) !important;
 }
 
 .play-button:hover {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translateY(-50%) scale(1.1) !important;
+}
+
+/* 添加动画信息显示区域的样式 */
+.debug-info {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 1000;
 }
 </style>
+
+<!-- 添加调试信息显示区域 -->
+<div id="debugInfo" class="debug-info">
+    正在检查动画支持...
+</div>
+
+<script>
+// 添加动画检测代码
+document.addEventListener('DOMContentLoaded', function() {
+    const img = document.getElementById('coverImage');
+    const debugInfo = document.getElementById('debugInfo');
+    
+    if (img) {
+        // 检查是否是动态WebP
+        let info = '封面图片信息：\n';
+        info += `- 路径: ${img.src}\n`;
+        info += `- 尺寸: ${img.naturalWidth}x${img.naturalHeight}\n`;
+        
+        // 创建一个新的Image对象来检查是否支持动画
+        const testImg = new Image();
+        testImg.onload = function() {
+            // 在某些浏览器中，可以通过checking frames来判断是否是动画
+            if (typeof testImg.decode === 'function') {
+                info += '- 浏览器支持图片解码API\n';
+            }
+        };
+        testImg.src = img.src;
+        
+        debugInfo.innerText = info;
+    }
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
