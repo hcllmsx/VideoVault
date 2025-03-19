@@ -7,19 +7,26 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// 修改缓存结构，增加过期时间
 const signedURLCache = new Map(); // 缓存已鉴权的链接
 
 // 生成带有鉴权的URL
 function signURL(originURL) {
+  const now = Date.now();
+  
+  // 检查缓存是否存在且未过期（设置2小时过期）
   if (signedURLCache.has(originURL)) {
-    return signedURLCache.get(originURL);
+    const cached = signedURLCache.get(originURL);
+    if (now - cached.timestamp < 2 * 60 * 60 * 1000) { // 2小时内有效
+      return cached.url;
+    }
   }
 
   const privateKey = process.env.AUTH_KEY; // 鉴权密钥
   const uid = process.env.UID; // 账号id
   const validDuration = 3 * 60 * 60 * 1000; // 链接签名有效期3小时，单位：毫秒
 
-  const ts = Math.floor((Date.now() + validDuration) / 1000); // 有效时间戳，单位：秒
+  const ts = Math.floor((now + validDuration) / 1000); // 有效时间戳，单位：秒
   const rInt = Math.floor(Math.random() * 1000000); // 随机正整数
 
   try {
@@ -32,7 +39,11 @@ function signURL(originURL) {
       objURL.searchParams.append('auth_key', authKey);
     }
     const signedURL = objURL.toString();
-    signedURLCache.set(originURL, signedURL);
+    // 缓存URL时同时记录时间戳
+    signedURLCache.set(originURL, {
+      url: signedURL,
+      timestamp: now
+    });
     return signedURL;
   } catch (error) {
     console.error('Failed to sign URL:', error);
