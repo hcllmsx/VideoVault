@@ -1,6 +1,18 @@
 <div class="video-wrapper">
     <div class="video-container">
-        <video id="videoPlayer" controls controlsList="nodownload" oncontextmenu="return false;" draggable="false" poster="<%= video.cover %>">
+        <% if (!video.cover.startsWith('http')) { %>
+            <!-- 默认封面使用动态图片 -->
+            <div id="coverContainer" style="position: relative; width: 100%; cursor: pointer;">
+                <img src="<%= video.cover %>" alt="Video Cover" style="width: 100%; height: auto; display: block;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); border-radius: 50%; padding: 20px;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#ffffff">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </div>
+            </div>
+        <% } %>
+        <video id="videoPlayer" controls controlsList="nodownload" oncontextmenu="return false;" draggable="false" 
+            <% if (video.cover.startsWith('http')) { %>poster="<%= video.cover %>"<% } else { %>style="display: none;"<% } %>>
             <source src="<%= video.signedUrl %>" type="video/mp4">
             Your browser does not support the video tag.
         </video>
@@ -12,7 +24,24 @@
     <p><%= video.description %></p>
 </div>
 
+<style>
+#coverContainer:hover .play-button {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+</style>
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const coverContainer = document.getElementById('coverContainer');
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    if (coverContainer) {
+        coverContainer.addEventListener('click', function() {
+            coverContainer.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            videoPlayer.play();
+        });
+    }
     document.addEventListener('DOMContentLoaded', function() {
         const video = document.getElementById('videoPlayer');
         
@@ -46,4 +75,13 @@
         
         if (video.readyState >= 1) adjustVideoSize();
     });
+
+    // 如果视频播放结束且使用的是默认封面，显示动态封面
+    videoPlayer.addEventListener('ended', function() {
+        if (coverContainer) {
+            videoPlayer.style.display = 'none';
+            coverContainer.style.display = 'block';
+        }
+    });
+});
 </script>
