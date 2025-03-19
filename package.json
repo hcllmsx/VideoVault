@@ -1,13 +1,13 @@
 {
   "name": "video-vault",
   "version": "1.0.0",
-  "description": "A video showcase website using 123 Cloud Storage",
+  "description": "一个基于Vercel，需要配合123云盘的视频展示网站，支持视频、图片文件鉴权。",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["video", "123 Cloud Storage", "Vercel"],
+  "keywords": ["video", "123pan", "Vercel"],
   "author": "hcllmsx",
   "license": "MIT",
   "dependencies": {

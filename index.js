@@ -146,6 +146,18 @@ app.get('/:videoSlug', (req, res) => {
   // 生成带鉴权的视频URL
   const signedVideoUrl = signURL(foundVideo.url);
   
+  let siteBrand = null;
+  if (process.env.SITE_BRAND) {
+    try {
+      siteBrand = JSON.parse(process.env.SITE_BRAND);
+      if (siteBrand.logo) {
+        siteBrand.logo = signURL(siteBrand.logo); // 对品牌 Logo 链接进行鉴权
+      }
+    } catch (error) {
+      console.error('Failed to parse SITE_BRAND:', error);
+    }
+  }
+
   res.render('video', { 
     video: {
       ...foundVideo,
@@ -153,7 +165,8 @@ app.get('/:videoSlug', (req, res) => {
     },
     refererDomain: process.env.DOMAIN,
     title: foundVideo.title,
-    isVideoPage: true
+    isVideoPage: true,
+    siteBrand
   });
 });
 
