@@ -1,6 +1,6 @@
 <div class="video-wrapper">
     <div class="video-container">
-        <video id="videoPlayer" controls autoplay controlsList="nodownload" oncontextmenu="return false;"<% if (video.cover) { %> poster="<%= video.cover %>"<% } %>>
+        <video id="videoPlayer" controls autoplay controlsList="nodownload" oncontextmenu="return false;" draggable="false"<% if (video.cover) { %> poster="<%= video.cover %>"<% } %>>
             <source src="<%= video.signedUrl %>" type="video/mp4">
             Your browser does not support the video tag.
         </video>
