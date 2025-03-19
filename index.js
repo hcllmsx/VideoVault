@@ -20,6 +20,8 @@ function signURL(originURL) {
     if (now - cached.timestamp < 2 * 60 * 60 * 1000) { // 2小时内有效
       return cached.url;
     }
+    // 如果过期，删除缓存
+    signedURLCache.delete(originURL);
   }
 
   const privateKey = process.env.AUTH_KEY; // 鉴权密钥
@@ -32,6 +34,9 @@ function signURL(originURL) {
   try {
     const objURL = new URL(originURL);
     if (objURL.hostname === 'vip.123pan.cn') {
+      // 移除已有的 auth_key 参数（如果存在）
+      objURL.searchParams.delete('auth_key');
+      
       const authKey = `${ts}-${rInt}-${uid}-${crypto
         .MD5(`${decodeURIComponent(objURL.pathname)}-${ts}-${rInt}-${uid}-${privateKey}`)
         .toString()}`;
