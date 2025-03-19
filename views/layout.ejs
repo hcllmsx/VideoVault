@@ -234,18 +234,14 @@
         <nav class="navbar">
             <div class="container">
                 <a href="/" class="navbar-brand">
-                    <% if (siteBrand) { %>
-                        <% if (siteBrand.logo && siteBrand.name) { %>
-                            <img src="<%= siteBrand.logo %>" alt="Logo" width="24" height="24" style="margin-right: 0.5rem;">
-                            <span style="color: #fd7e0d;"><%= siteBrand.name %></span>
-                        <% } else if (siteBrand.logo) { %>
-                            <img src="<%= siteBrand.logo %>" alt="Logo" width="24" height="24">
-                        <% } else if (siteBrand.name) { %>
-                            <span style="color: #fd7e0d;"><%= siteBrand.name %></span>
-                        <% } %>
-                    <% } else { %>
-                        <img src="/media/videovault-icon.svg" alt="VideoVault" width="24" height="24">
-                        <span style="color: #fd7e0d;">VideoVault</span>
+                    <% 
+                    const defaultLogo = "/media/videovault-icon.svg";
+                    const defaultName = "VideoVault";
+                    const logoSrc = (siteBrand && siteBrand.logo) ? siteBrand.logo : defaultLogo;
+                    const brandName = (siteBrand && siteBrand.name) ? siteBrand.name : defaultName;
+                    %>
+                    <img src="<%= logoSrc %>" alt="<%= brandName %>" width="24" height="24" style="margin-right: 0.5rem;">
+                    <span style="color: #fd7e0d;"><%= brandName %></span>
                     <% } %>
                 </a>
             </div>

@@ -37,7 +37,7 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
 
   与上面的相同参数，只是可以写多个 `{}`里的数据，用 `[]`框起来
   例如：`[{"url":"","slug":"","group":"","title":"","description":"","cover":""},{"url":"","slug":"","group":"","title":"","description":"","cover":""}]`
-- `SITE_BRAND `：（可选）自定义网站品牌设置，JSON格式，包含以下字段：
+- `SITE_BRAND`：（可选）自定义网站品牌设置，JSON格式，包含以下字段：
 
   - `logo`: 网站Logo图片的URL
   - `name`: 网站名称，替换默认的"VideoVault"
