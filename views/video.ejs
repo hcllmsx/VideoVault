@@ -2,9 +2,10 @@
     <div class="video-container">
         <% if (!video.cover.startsWith('http')) { %>
             <!-- 默认封面使用动态图片 -->
-            <div id="coverContainer" style="position: relative; width: 100%; cursor: pointer;">
-                <img src="<%= video.cover %>" alt="Video Cover" style="width: 100%; height: auto; display: block;">
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); border-radius: 50%; padding: 20px;">
+            <div id="coverContainer" class="default-cover" style="position: relative; width: 100%; cursor: pointer; background-image: url('<%= video.cover %>'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                <!-- 占位 div 用于保持宽高比 16:9 -->
+                <div style="width: 100%; padding-top: 56.25%;"></div>
+                <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); border-radius: 50%; padding: 20px; transition: transform 0.3s ease;">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="#ffffff">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
@@ -25,7 +26,17 @@
 </div>
 
 <style>
+.default-cover {
+    background-color: #000;
+    image-rendering: -webkit-optimize-contrast; /* 优化 WebP 渲染 */
+    image-rendering: crisp-edges;
+}
+
 #coverContainer:hover .play-button {
+    transform: translate(-50%, -50%) scale(1.1) !important;
+}
+
+.play-button:hover {
     transform: translate(-50%, -50%) scale(1.1);
 }
 </style>
