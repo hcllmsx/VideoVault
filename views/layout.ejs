@@ -63,7 +63,8 @@
             margin: 2rem 0 1rem;
             padding: 0 0 0.5rem 0;
             position: relative;
-            margin-left: -4em;
+            margin-left: -2em;
+            margin-right: -2em;
         }
 
         .group-header::after {
@@ -79,7 +80,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 1rem 0;
+            padding: 1rem;
             transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
@@ -178,17 +179,21 @@
         /* 响应式调整 */
         @media (max-width: 768px) {
             .video-item {
-                flex-direction: column;
+                flex-direction: row; /* 保持水平布局 */
+                padding: 1rem;
+                margin: 0 1rem; /* 与分组标题对齐 */
             }
 
             .video-info {
-                padding-right: 0;
-                margin-bottom: 1rem;
+                padding-right: 1rem; /* 恢复右边距 */
+                margin-bottom: 0; /* 移除底部边距 */
+                flex: 1; /* 让内容区域占据剩余空间 */
             }
 
             .watch-button {
-                width: 100%;
-                text-align: center;
+                width: auto; /* 恢复自动宽度 */
+                white-space: nowrap; /* 确保按钮文字不换行 */
+                align-self: center; /* 垂直居中对齐 */
             }
 
             .search-container {
@@ -196,13 +201,14 @@
             }
 
             .group-header {
-                margin-left: 0; /* 移动端不需要负边距 */
-                padding: 0 1rem 0.5rem 1rem; /* 添加合适的内边距 */
+                margin-left: 0;
+                margin-right: 0;
+                padding: 0 1rem 0.5rem 1rem;
             }
 
             .group-header::after {
-                left: 1rem; /* 调整下划线位置 */
-                width: calc(100% - 2rem); /* 调整下划线宽度 */
+                left: 1rem;
+                width: calc(100% - 2rem);
             }
         }
     </style>
