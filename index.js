@@ -12,6 +12,11 @@ const signedURLCache = new Map(); // 缓存已鉴权的链接
 
 // 生成带有鉴权的URL
 function signURL(originURL) {
+  // 如果是相对路径，不进行签名
+  if (originURL.startsWith('/')) {
+    return originURL;
+  }
+
   const now = Date.now();
   
   // 检查缓存是否存在且未过期（设置2小时过期）
@@ -32,6 +37,10 @@ function signURL(originURL) {
   const rInt = Math.floor(Math.random() * 1000000); // 随机正整数
 
   try {
+    // 确保URL是有效的
+    if (!originURL.startsWith('http://') && !originURL.startsWith('https://')) {
+      throw new Error('Invalid URL: ' + originURL);
+    }
     const objURL = new URL(originURL);
     if (objURL.hostname === 'vip.123pan.cn') {
       // 移除已有的 auth_key 参数（如果存在）
@@ -74,7 +83,7 @@ function parseVideosConfig() {
       title: '未命名视频',
       description: '暂无描述',
       group: '默认分组',
-      cover: '/media/VideoVault-standby.webp' // 默认封面
+      cover: '/media/VideoVault-standby.webp' // 默认封面（相对路径，不需要签名）
     };
     const video = { ...defaultVideo, ...videoConfig };
     if (!video.url || !video.slug) {
