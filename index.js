@@ -18,8 +18,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 解析环境变量中的视频信息
 function parseVideosConfig() {
-  const groups = {};
-  
+  // 调试信息
+  const envKeys = Object.keys(process.env).filter(key => key.startsWith('VIDEOS_CONFIG'));
+  console.log('Found video config keys:', envKeys);
   function processVideo(videoConfig) {
     const defaultVideo = {
       title: '未命名视频',
@@ -38,21 +39,6 @@ function parseVideosConfig() {
     groups[video.group].push(video);
   }
 
-  // 尝试解析单个JSON配置
-  const videosConfig = process.env.VIDEOS_CONFIG || '';
-  if (videosConfig) {
-    try {
-      const parsedVideos = JSON.parse(videosConfig);
-      if (Array.isArray(parsedVideos)) {
-        parsedVideos.forEach(processVideo);
-      } else {
-        processVideo(parsedVideos);
-      }
-    } catch (error) {
-      console.error('Failed to parse VIDEOS_CONFIG:', error);
-    }
-  }
-  
   // 查找所有以VIDEOS_CONFIG_开头的环境变量
   const videoConfigPattern = /^VIDEOS_CONFIG_(\d+)$/;
   Object.keys(process.env).forEach(key => {
