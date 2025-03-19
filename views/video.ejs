@@ -11,22 +11,6 @@
                 </div>
             </div>
         <% } %>
-                <!-- 方式2: 使用背景图片 -->
-                <div id="coverBackground" style="margin-top: 20px; width: 100%; position: relative;">
-                    <div style="width: 100%; padding-top: 56.25%; background-image: url('<%= video.cover %>'); background-size: contain; background-position: center; background-repeat: no-repeat;"></div>
-                    <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 12px;">
-                        background-image 显示
-                    </div>
-                </div>
-
-                <!-- 播放按钮，覆盖在两个测试区域上方 -->
-                <div class="play-button" style="position: fixed; top: 50%; right: 20px; transform: translateY(-50%); background: rgba(0,0,0,0.7); border-radius: 50%; padding: 20px; transition: transform 0.3s ease; z-index: 1000;">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#ffffff">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                </div>
-            </div>
-        <% } %>
         <video id="videoPlayer" controls controlsList="nodownload" oncontextmenu="return false;" draggable="false" 
             <% if (video.cover.startsWith('http')) { %>poster="<%= video.cover %>"<% } else { %>style="display: none;"<% } %>>
             <source src="<%= video.signedUrl %>" type="video/mp4">
@@ -50,70 +34,9 @@
 }
 
 .play-button:hover {
-    transform: translateY(-50%) scale(1.1) !important;
-}
-
-/* 添加动画信息显示区域的样式 */
-.debug-info {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    z-index: 1000;
+    transform: translate(-50%, -50%) scale(1.1) !important;
 }
 </style>
-
-<!-- 添加调试信息显示区域 -->
-<div id="debugInfo" class="debug-info">
-    正在检查动画支持...
-</div>
-
-<script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 处理动画封面循环播放
-        const animatedCover = document.getElementById('animatedCover');
-        if (animatedCover) {
-            // 监听动画结束事件
-            animatedCover.addEventListener('load', function() {
-                // 创建一个计时器来检测动画是否停止
-                let lastSrc = animatedCover.src;
-                setInterval(() => {
-                    // 通过重新加载图片来重启动画
-                    if (animatedCover.complete) {
-                        animatedCover.src = lastSrc + '#' + new Date().getTime();
-                    }
-                }, 3000); // 假设动画大约持续3秒，可以根据实际情况调整
-            });
-        }
-
-    const img = document.getElementById('coverImage');
-    const debugInfo = document.getElementById('debugInfo');
-    
-    if (img) {
-        // 检查是否是动态WebP
-        let info = '封面图片信息：\n';
-        info += `- 路径: ${img.src}\n`;
-        info += `- 尺寸: ${img.naturalWidth}x${img.naturalHeight}\n`;
-        
-        // 创建一个新的Image对象来检查是否支持动画
-        const testImg = new Image();
-        testImg.onload = function() {
-            // 在某些浏览器中，可以通过checking frames来判断是否是动画
-            if (typeof testImg.decode === 'function') {
-                info += '- 浏览器支持图片解码API\n';
-            }
-        };
-        testImg.src = img.src;
-        
-        debugInfo.innerText = info;
-    }
-});
-</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -127,39 +50,38 @@ document.addEventListener('DOMContentLoaded', function() {
             videoPlayer.play();
         });
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        const video = document.getElementById('videoPlayer');
-        
-        function adjustVideoSize() {
-            if (!video.videoWidth || !video.videoHeight) return;
-            
-            const maxWidth = Math.min(1280, window.innerWidth);
-            const maxHeight = 720;
-            const videoRatio = video.videoWidth / video.videoHeight;
-            
-            let width = video.videoWidth;
-            let height = video.videoHeight;
-            
-            if (width > maxWidth) {
-                width = maxWidth;
-                height = width / videoRatio;
-            }
-            
-            if (height > maxHeight) {
-                height = maxHeight;
-                width = height * videoRatio;
-            }
-            
-            video.style.width = '100%';
-            video.style.maxWidth = `${width}px`;
-            video.style.height = 'auto';
-        }
 
-        video.addEventListener('loadedmetadata', adjustVideoSize);
-        window.addEventListener('resize', adjustVideoSize);
+    const video = document.getElementById('videoPlayer');
+    
+    function adjustVideoSize() {
+        if (!video.videoWidth || !video.videoHeight) return;
         
-        if (video.readyState >= 1) adjustVideoSize();
-    });
+        const maxWidth = Math.min(1280, window.innerWidth);
+        const maxHeight = 720;
+        const videoRatio = video.videoWidth / video.videoHeight;
+        
+        let width = video.videoWidth;
+        let height = video.videoHeight;
+        
+        if (width > maxWidth) {
+            width = maxWidth;
+            height = width / videoRatio;
+        }
+        
+        if (height > maxHeight) {
+            height = maxHeight;
+            width = height * videoRatio;
+        }
+        
+        video.style.width = '100%';
+        video.style.maxWidth = `${width}px`;
+        video.style.height = 'auto';
+    }
+
+    video.addEventListener('loadedmetadata', adjustVideoSize);
+    window.addEventListener('resize', adjustVideoSize);
+    
+    if (video.readyState >= 1) adjustVideoSize();
 
     // 如果视频播放结束且使用的是默认封面，显示动态封面
     videoPlayer.addEventListener('ended', function() {
