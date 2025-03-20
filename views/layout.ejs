@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'VideoVault' %></title>
+    <title>
+        <%= typeof title !=='undefined' ? title : 'VideoVault' %>
+    </title>
     <!-- Bootstrap 5 CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Plyr CSS -->
@@ -140,15 +144,18 @@
             background-color: #000;
             width: 100%;
             max-width: 1280px;
-            line-height: 0; /* 移除容器底部的额外空间 */
-            font-size: 0; /* 确保没有文字间距影响 */
+            line-height: 0;
+            /* 移除容器底部的额外空间 */
+            font-size: 0;
+            /* 确保没有文字间距影响 */
         }
 
         video {
             width: 100%;
             max-width: 100%;
             height: auto;
-            display: block; /* 移除视频元素底部的额外空间 */
+            display: block;
+            /* 移除视频元素底部的额外空间 */
         }
 
         .video-content {
@@ -184,18 +191,49 @@
             object-fit: contain;
         }
 
-        
-
-        
-
         .plyr--fullscreen {
             position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100vw;
+            max-height: 100vh;
             z-index: 9999;
         }
+
+        .plyr--fullscreen .plyr__video-wrapper {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            min-width: 100vw;
+            min-height: 100vh;
+        }
+
+        .plyr--fullscreen video {
+            object-fit: contain !important;
+            flex-shrink: 0;
+            min-width: 100%;
+            min-height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center;
+            transition: transform 0.2s;
+        }
+
+        .plyr--fullscreen .plyr__video-wrapper {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+
         .plyr--fullscreen .plyr__video-wrapper {
             width: 100% !important;
             height: 100% !important;
@@ -209,7 +247,8 @@
             width: 100% !important;
             height: 100% !important;
             object-fit: contain;
-            transform: scale(1.001); /* 修复1像素空隙 */
+            transform: scale(1.001);
+            /* 修复1像素空隙 */
         }
 
         /* 页脚样式 */
@@ -225,21 +264,29 @@
         /* 响应式调整 */
         @media (max-width: 768px) {
             .video-item {
-                flex-direction: row; /* 保持水平布局 */
+                flex-direction: row;
+                /* 保持水平布局 */
                 padding: 1rem;
-                margin: 0 1rem; /* 与分组标题对齐 */
+                margin: 0 1rem;
+                /* 与分组标题对齐 */
             }
 
             .video-info {
-                padding-right: 1rem; /* 恢复右边距 */
-                margin-bottom: 0; /* 移除底部边距 */
-                flex: 1; /* 让内容区域占据剩余空间 */
+                padding-right: 1rem;
+                /* 恢复右边距 */
+                margin-bottom: 0;
+                /* 移除底部边距 */
+                flex: 1;
+                /* 让内容区域占据剩余空间 */
             }
 
             .watch-button {
-                width: auto; /* 恢复自动宽度 */
-                white-space: nowrap; /* 确保按钮文字不换行 */
-                align-self: center; /* 垂直居中对齐 */
+                width: auto;
+                /* 恢复自动宽度 */
+                white-space: nowrap;
+                /* 确保按钮文字不换行 */
+                align-self: center;
+                /* 垂直居中对齐 */
             }
 
             .search-container {
@@ -258,53 +305,85 @@
             }
         }
     </style>
-    <% if (typeof isVideoPage !== 'undefined' && isVideoPage) { %>
-    <script>
-        // 禁止F12和右键菜单
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode === 123) { // F12 key
+    <% if (typeof isVideoPage !=='undefined' && isVideoPage) { %>
+        <script>
+            // 禁止F12和右键菜单
+            document.addEventListener('keydown', function (e) {
+                if (e.keyCode === 123) { // F12 key
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            document.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
                 return false;
-            }
-        });
-        
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
+            });
 
-        const player = new Plyr('video', {
-            controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen']
-        });
-        
-        // 强制重绘视频容器
-        const videoWrapper = document.querySelector('.video-container');
-        if(videoWrapper) {
-            videoWrapper.style.display = 'none';
-            videoWrapper.offsetHeight; // 触发重排
-            videoWrapper.style.display = 'block';
-        }
-        
-        // 初始化后重置播放器尺寸
-        setTimeout(() => {
-            player.resize();
-        }, 100);
-    </script>
-    <% } %>
+            const player = new Plyr('video', {
+                controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen']
+            });
+
+            // 强制重绘视频容器
+            const videoWrapper = document.querySelector('.video-container');
+            if (videoWrapper) {
+                videoWrapper.style.display = 'none';
+                videoWrapper.offsetHeight; // 触发重排
+                videoWrapper.style.display = 'block';
+                // 添加额外尺寸重置
+                setTimeout(() => {
+                    player.resize();
+                    const computedStyle = window.getComputedStyle(videoWrapper);
+                    videoWrapper.style.width = computedStyle.width;
+                    videoWrapper.style.height = computedStyle.height;
+                }, 200);
+            }
+
+            // 添加全局尺寸监听
+            window.addEventListener('resize', () => {
+                player.resize();
+                if (videoWrapper) {
+                    videoWrapper.style.width = '100%';
+                    videoWrapper.style.height = 'auto';
+                    // 强制同步视频尺寸
+                    requestAnimationFrame(() => {
+                        player.resize();
+                        videoWrapper.style.transform = 'translateZ(0)';
+                    });
+                }
+            });
+
+            // 单集视频初始化后立即触发
+            if (document.querySelector('#single-video-init')) {
+                requestAnimationFrame(() => {
+                    videoWrapper.style.width = '100%';
+                    videoWrapper.style.height = 'auto';
+                    videoWrapper.style.transform = 'translateZ(0)';
+                    player.resize();
+                    // 添加边界尺寸同步
+                    const rect = videoWrapper.getBoundingClientRect();
+                    videoWrapper.style.minWidth = `${rect.width}px`;
+                    videoWrapper.style.minHeight = `${rect.height}px`;
+                });
+            }
+        </script>
+        <% } %>
 </head>
+
 <body>
     <div class="container">
         <nav class="navbar">
             <div class="container">
                 <a href="/" class="navbar-brand">
-                    <% 
-                    const defaultLogo = "/media/videovault-icon.svg";
-                    const defaultName = "VideoVault";
-                    const logoSrc = (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.logo) ? siteBrand.logo : defaultLogo;
-                    const brandName = (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.name) ? siteBrand.name : defaultName;
-                    %>
-                    <img src="<%= logoSrc %>" alt="<%= brandName %>" width="24" height="24" style="margin-right: 0.5rem;">
-                    <span style="color: #fd7e0d;"><%= brandName %></span>
+                    <% const defaultLogo="/media/videovault-icon.svg" ; const defaultName="VideoVault" ; const
+                        logoSrc=(typeof siteBrand !=='undefined' && siteBrand && siteBrand.logo) ? siteBrand.logo :
+                        defaultLogo; const brandName=(typeof siteBrand !=='undefined' && siteBrand && siteBrand.name) ?
+                        siteBrand.name : defaultName; %>
+                        <img src="<%= logoSrc %>" alt="<%= brandName %>" width="24" height="24"
+                            style="margin-right: 0.5rem;">
+                        <span style="color: #fd7e0d;">
+                            <%= brandName %>
+                        </span>
                 </a>
             </div>
         </nav>
@@ -316,7 +395,11 @@
         </div>
 
         <footer class="footer">
-            <p>&copy; <%= new Date().getFullYear() %> <% if (siteBrand && siteBrand.name) { %><%= siteBrand.name %> by <% } %><a href="https://github.com/hcllmsx/VideoVault" style="color: inherit; text-decoration: none; font-weight: bold;">VideoVault</a>. All rights reserved.</p>
+            <p>&copy; <%= new Date().getFullYear() %>
+                    <% if (siteBrand && siteBrand.name) { %>
+                        <%= siteBrand.name %> by <% } %><a href="https://github.com/hcllmsx/VideoVault"
+                                    style="color: inherit; text-decoration: none; font-weight: bold;">VideoVault</a>.
+                                All rights reserved.</p>
         </footer>
     </div>
 
@@ -325,4 +408,5 @@
     <!-- Plyr JS -->
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 </body>
+
 </html>
