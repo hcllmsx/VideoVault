@@ -101,20 +101,39 @@
 }
 
 /* 修复全屏模式样式 */
-.plyr--fullscreen video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    max-width: 100% !important;
-    max-height: 100% !important;
+.plyr--fullscreen-fallback,
+.plyr--fullscreen {
+    background: #000 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }
 
-.plyr--fullscreen-active .plyr__video-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.plyr--fullscreen video,
+.plyr--fullscreen-fallback video {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: contain !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+.plyr--fullscreen .plyr__video-wrapper,
+.plyr--fullscreen-fallback .plyr__video-wrapper {
+    height: 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.plyr--fullscreen .plyr__control--overlaid,
+.plyr--fullscreen-fallback .plyr__control--overlaid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 </style>
 
@@ -131,10 +150,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 视频加载完成后调整大小
     function adjustVideoSize() {
         const video = document.getElementById('videoPlayer');
+        const container = video.closest('.video-container');
         if (!video.videoWidth || !video.videoHeight) return;
         
         const maxWidth = Math.min(1280, window.innerWidth);
-        const maxHeight = 720;
+        const maxHeight = Math.min(720, window.innerHeight);
         const videoRatio = video.videoWidth / video.videoHeight;
         
         let width = video.videoWidth;
@@ -150,15 +170,45 @@ document.addEventListener('DOMContentLoaded', function() {
             width = height * videoRatio;
         }
         
+        // 设置容器尺寸
+        container.style.width = '100%';
+        container.style.maxWidth = `${width}px`;
+        container.style.height = 'auto';
+        
+        // 设置视频尺寸
         video.style.width = '100%';
-        video.style.maxWidth = `${width}px`;
-        video.style.height = 'auto';
+        video.style.height = '100%';
+        video.style.maxWidth = '100%';
+        video.style.objectFit = 'contain';
+        
+        // 强制重绘
+        player.resize();
     }
 
+    // 视频加载和全屏状态变化时调整尺寸
     player.on('loadedmetadata', adjustVideoSize);
-    window.addEventListener('resize', adjustVideoSize);
+    player.on('enterfullscreen', () => {
+        const video = player.media;
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.maxWidth = 'none';
+        video.style.maxHeight = 'none';
+        video.style.objectFit = 'contain';
+        player.resize();
+    });
+    player.on('exitfullscreen', adjustVideoSize);
     
-    if (player.media.readyState >= 1) adjustVideoSize();
+    // 窗口大小改变时调整尺寸
+    window.addEventListener('resize', () => {
+        if (!player.fullscreen.active) {
+            adjustVideoSize();
+        }
+    });
+    
+    // 初始化时如果视频已经加载完成则调整尺寸
+    if (player.media.readyState >= 1) {
+        adjustVideoSize();
+    }
 
     // 处理分集切换
     if (isSeries) {
@@ -180,6 +230,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         size: quality.height
                     }))
                 };
+                
+                // 切换视频时重置视频容器尺寸
+                const videoElement = player.media;
+                const container = videoElement.closest('.video-container');
+                container.style.width = '100%';
+                container.style.height = 'auto';
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                videoElement.style.objectFit = 'contain';
+                
+                // 强制触发尺寸调整
+                player.once('loadedmetadata', () => {
+                    adjustVideoSize();
+                    player.resize();
+                });
                 
                 // 更新视频封面
                 player.poster = episode.cover;

@@ -176,79 +176,62 @@
         }
 
         /* 全屏模式修复 */
-        .plyr--fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 9999;
-        }
-
-        .plyr--fullscreen video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain;
-        }
-
+        .plyr--fullscreen-fallback,
         .plyr--fullscreen {
             position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 100vw;
-            max-height: 100vh;
-            z-index: 9999;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            z-index: 9999 !important;
+            background: #000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
         }
-
-        .plyr--fullscreen .plyr__video-wrapper {
+        
+        .plyr--fullscreen .plyr__video-wrapper,
+        .plyr--fullscreen-fallback .plyr__video-wrapper {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
             width: 100% !important;
             height: 100% !important;
             display: flex !important;
-            align-items: center;
-            justify-content: center;
-            min-width: 100vw;
-            min-height: 100vh;
-        }
-
-        .plyr--fullscreen video {
-            object-fit: contain !important;
-            flex-shrink: 0;
-            min-width: 100%;
-            min-height: 100%;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            transform-origin: center center;
-            transition: transform 0.2s;
-        }
-
-        .plyr--fullscreen .plyr__video-wrapper {
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            perspective: 1000px;
-        }
-
-        .plyr--fullscreen .plyr__video-wrapper {
-            width: 100% !important;
-            height: 100% !important;
-            min-height: 100% !important;
-            display: flex !important;
-            justify-content: center !important;
             align-items: center !important;
+            justify-content: center !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            transform: none !important;
         }
-
-        .plyr--fullscreen video {
+        
+        .plyr--fullscreen video,
+        .plyr--fullscreen-fallback video {
             width: 100% !important;
             height: 100% !important;
-            object-fit: contain;
-            transform: scale(1.001);
-            /* 修复1像素空隙 */
+            max-width: 100% !important;
+            max-height: 100% !important;
+            object-fit: contain !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            margin: auto !important;
+        }
+        
+        /* 确保控制条在全屏模式下正确显示 */
+        .plyr--fullscreen .plyr__controls,
+        .plyr--fullscreen-fallback .plyr__controls {
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 10 !important;
         }
 
         /* 页脚样式 */
@@ -324,75 +307,113 @@
                 controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen']
             });
 
-            // 强制重绘视频容器
+            // 获取视频容器
             const videoWrapper = document.querySelector('.video-container');
-            if (videoWrapper) {
-                videoWrapper.style.display = 'none';
-                videoWrapper.offsetHeight; // 触发重排
-                videoWrapper.style.display = 'block';
-                // 添加额外尺寸重置
-                setTimeout(() => {
-                    player.resize();
-                    const computedStyle = window.getComputedStyle(videoWrapper);
-                    videoWrapper.style.width = computedStyle.width;
-                    videoWrapper.style.height = computedStyle.height;
-                }, 200);
-            }
-
-            // 添加全局尺寸监听
-            window.addEventListener('resize', () => {
-                player.resize();
-                if (videoWrapper) {
-                    videoWrapper.style.width = '100%';
-                    videoWrapper.style.height = 'auto';
-                    // 强制同步视频尺寸
-                    requestAnimationFrame(() => {
-                        player.resize();
-                        videoWrapper.style.transform = 'translateZ(0)';
-                    });
+            const videoElement = document.querySelector('video');
+            
+            // 全屏模式处理函数
+            const handleFullscreenChange = () => {
+                if (document.fullscreenElement || 
+                    document.webkitFullscreenElement || 
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement) {
+                    // 进入全屏
+                    videoElement.style.width = '100%';
+                    videoElement.style.height = '100%';
+                    videoElement.style.objectFit = 'contain';
+                    videoElement.style.maxWidth = 'none';
+                    videoElement.style.maxHeight = 'none';
+                } else {
+                    // 退出全屏
+                    setTimeout(() => {
+                        initVideoLayout();
+                    }, 100);
                 }
-            });
-
-            // 全局视频初始化逻辑
-            const initVideoLayout = () => {
-                videoWrapper.style.width = '100%';
-                videoWrapper.style.height = 'auto';
-                videoWrapper.style.transform = 'translateZ(0)';
                 player.resize();
             };
-
-            // 统一初始化入口
-            // 统一初始化入口
+            
+            // 监听全屏变化事件
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+            
+            // 全局视频初始化逻辑
+            const initVideoLayout = () => {
+                if (!videoWrapper || !videoElement) return;
+                
+                // 重置容器样式
+                videoWrapper.style.width = '100%';
+                videoWrapper.style.height = 'auto';
+                videoWrapper.style.display = 'block';
+                
+                // 重置视频元素样式
+                videoElement.style.width = '100%';
+                videoElement.style.height = 'auto';
+                videoElement.style.objectFit = 'contain';
+                videoElement.style.maxWidth = '100%';
+                
+                // 强制重绘
+                player.resize();
+                
+                // 打印尺寸信息以便调试
+                console.log('视频布局初始化完成', {
+                    videoWidth: videoElement.videoWidth,
+                    videoHeight: videoElement.videoHeight,
+                    containerWidth: videoWrapper.offsetWidth,
+                    containerHeight: videoWrapper.offsetHeight
+                });
+            };
+            
+            // 添加全局尺寸监听
+            window.addEventListener('resize', () => {
+                if (!player.fullscreen.active) {
+                    requestAnimationFrame(initVideoLayout);
+                }
+            });
+            
+            // 播放器事件监听
             player.on('ready', () => {
                 console.log('视频播放器初始化完成');
                 videoWrapper.dataset.playerReady = 'true';
                 initVideoLayout();
-                new ResizeObserver(initVideoLayout).observe(videoWrapper);
+                
+                // 使用ResizeObserver监听容器大小变化
+                if (window.ResizeObserver) {
+                    new ResizeObserver(() => {
+                        if (!player.fullscreen.active) {
+                            requestAnimationFrame(initVideoLayout);
+                        }
+                    }).observe(videoWrapper);
+                }
             });
-
-            // 基础初始化方案
-            const setupVideoPlayer = () => {
-                // 设置基础尺寸
-                videoWrapper.style.width = '100%';
-                videoWrapper.style.height = 'auto';
-                
-                // 初始化播放器
-                player.source = videoSources;
+            
+            // 视频元数据加载完成后调整尺寸
+            player.on('loadedmetadata', () => {
+                initVideoLayout();
+            });
+            
+            // 全屏事件处理
+            player.on('enterfullscreen', () => {
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                videoElement.style.objectFit = 'contain';
+                videoElement.style.maxWidth = 'none';
+                videoElement.style.maxHeight = 'none';
                 player.resize();
-                
-                // 全屏事件处理
-                player.on('enterfullscreen exitfullscreen', () => {
-                    requestAnimationFrame(() => player.resize());
-                });
-            };
-
-            // 统一初始化入口
+            });
+            
+            player.on('exitfullscreen', () => {
+                setTimeout(initVideoLayout, 100);
+            });
+            
+            // 初始化播放器
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', setupVideoPlayer);
+                document.addEventListener('DOMContentLoaded', initVideoLayout);
             } else {
-                setupVideoPlayer();
+                initVideoLayout();
             }
-
+            
             // 处理动态加载内容
             document.addEventListener('video-loaded', initVideoLayout);
         </script>
