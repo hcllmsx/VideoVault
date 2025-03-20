@@ -29,6 +29,7 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
 - `DOMAIN`：123云盘Referer鉴权的域名（同时也是Vercel项目绑定的域名）
 - `PLYR_CONFIG`：（可选）Plyr播放器的全局配置，JSON格式
 - `VIDEO_SERIES_n`：（可选）视频合集配置，`n`为数字，从1开始
+
   - `slug`：（必须）视频合集标识
   - `group`：视频合集分组名称
   - `title`：视频合集标题
@@ -43,7 +44,10 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
       - `height`：视频高度（如720、1080等）
       - `label`：（可选）质量标签（如"720P"、"1080P"等）
 
+  > **配置多个视频说明**：要在一个视频合集中添加多个视频，只需在 `episodes`数组中添加多个视频对象即可。每个视频对象都需要包含完整的信息（标题、描述、封面和质量选项）。系统会自动在视频播放页面生成分集列表，用户可以点击切换不同的视频。第一个视频将作为默认显示的视频。
+  >
 - `VIDEO_SINGLE_n`：（可选）单集视频配置，`n`为数字，从1开始
+
   - `slug`：（必须）视频标识
   - `group`：视频分组名称
   - `title`：视频标题
@@ -53,14 +57,15 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
     - `url`：视频直链URL
     - `height`：视频高度（如720、1080等）
     - `label`：（可选）质量标签（如"720P"、"1080P"等）
-
 - `SITE_BRAND`：（可选）自定义网站品牌设置，JSON格式，包含以下字段：
+
   - `logo`: 网站Logo图片的URL
   - `name`: 网站名称，替换默认的"VideoVault"
 
 ## 配置示例
 
-### 视频合集配置示例
+### 视频合集配置示例 `VIDEO_SERIES_n`
+
 ```json
 {
     "slug": "my-series",
@@ -75,12 +80,46 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
             "cover": "https://example.com/ep1.jpg",
             "qualities": [
                 {
-                    "url": "https://example.com/video-720p.mp4",
+                    "url": "https://example.com/ep1-720p.mp4",
                     "height": 720,
                     "label": "720P"
                 },
                 {
-                    "url": "https://example.com/video-1080p.mp4",
+                    "url": "https://example.com/ep1-1080p.mp4",
+                    "height": 1080,
+                    "label": "1080P"
+                }
+            ]
+        },
+        {
+            "title": "第二集",
+            "description": "第二集描述",
+            "cover": "https://example.com/ep2.jpg",
+            "qualities": [
+                {
+                    "url": "https://example.com/ep2-720p.mp4",
+                    "height": 720,
+                    "label": "720P"
+                },
+                {
+                    "url": "https://example.com/ep2-1080p.mp4",
+                    "height": 1080,
+                    "label": "1080P"
+                }
+            ]
+        },
+        {
+            "title": "第三集",
+            "description": "第三集描述",
+            "cover": "https://example.com/ep3.jpg",
+            "qualities": [
+                {
+                    "url": "https://example.com/ep3-720p.mp4",
+                    "height": 720,
+                    "label": "720P"
+                },
+                {
+                    "url": "https://example.com/ep3-1080p.mp4",
                     "height": 1080,
                     "label": "1080P"
                 }
@@ -90,7 +129,8 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
 }
 ```
 
-### 单集视频配置示例
+### 单集视频配置示例 `VIDEO_SINGLE_n`
+
 ```json
 {
     "slug": "my-video",
@@ -113,7 +153,8 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
 }
 ```
 
-### Plyr播放器配置示例
+### Plyr播放器配置示例 `PLYR_CONFIG`
+
 ```json
 {
     "theme": "dark",
@@ -137,13 +178,11 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
    git clone https://github.com/hcllmsx/VideoVault.git
    cd VideoVault
    ```
-
 2. 安装依赖：
 
    ```bash
    npm install
    ```
-
 3. 创建 .env 文件并配置环境变量：
 
    ```bash
@@ -154,7 +193,6 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
    VIDEO_SINGLE_1={"slug":"my-video","group":"电影","title":"我的电影","description":"这是一部电影","cover":"https://example.com/cover.jpg","qualities":[...]}
    PLYR_CONFIG={"theme":"dark","controls":[...]}
    ```
-
 4. 启动开发服务器：
 
    ```bash
