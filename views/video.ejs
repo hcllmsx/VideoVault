@@ -99,6 +99,23 @@
     font-size: 0.9rem;
     color: var(--secondary-color);
 }
+
+/* 修复全屏模式样式 */
+.plyr--fullscreen video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+.plyr--fullscreen-active .plyr__video-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 </style>
 
 <script>

@@ -82,8 +82,52 @@ function parsePlyrConfig() {
     iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg',
     blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
     quality: {
-      default: 720,
+      default: 1080,
       options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
+    },
+    i18n: {
+      restart: '重新播放',
+      rewind: '倒退{seektime}秒',
+      play: '播放',
+      pause: '暂停',
+      fastForward: '快进{seektime}秒',
+      seek: '跳转',
+      seekLabel: '{currentTime} / {duration}',
+      played: '已播放',
+      buffered: '已缓冲',
+      currentTime: '当前时间',
+      duration: '时长',
+      volume: '音量',
+      mute: '静音',
+      unmute: '取消静音',
+      enableCaptions: '启用字幕',
+      disableCaptions: '禁用字幕',
+      download: '下载',
+      enterFullscreen: '进入全屏',
+      exitFullscreen: '退出全屏',
+      frameTitle: '{title}',
+      captions: '字幕',
+      settings: '设置',
+      menuBack: '返回上级菜单',
+      speed: '播放速度',
+      normal: '正常',
+      quality: '视频质量',
+      loop: '循环',
+      start: '开始',
+      end: '结束',
+      all: '全部',
+      reset: '重置',
+      disabled: '禁用',
+      enabled: '启用',
+      advertisement: '广告',
+      qualityBadge: {
+        2160: '4K',
+        1440: 'HD',
+        1080: 'HD',
+        720: 'HD',
+        576: 'SD',
+        480: 'SD'
+      }
     }
   };
 
@@ -111,9 +155,9 @@ function parseVideoSeriesConfig() {
       try {
         const parsedSeries = JSON.parse(config);
         if (Array.isArray(parsedSeries)) {
-          parsedSeries.forEach(series => processSeries(series));
+          parsedSeries.forEach(seriesItem => processSeries(seriesItem, series));
         } else {
-          processSeries(parsedSeries);
+          processSeries(parsedSeries, series);
         }
       } catch (error) {
         console.error('Failed to parse video series config:', error);
@@ -121,28 +165,28 @@ function parseVideoSeriesConfig() {
     }
   });
 
-  function processSeries(seriesConfig) {
+  function processSeries(seriesConfig, targetObj) {
     const defaultSeries = {
       title: '未命名合集',
       description: '暂无描述',
       group: '默认分组',
-      cover: '/media/VideoVault-loop.webp',
+      cover: '/media/VideoVault-standby.webp',
       episodes: []
     };
 
-    const series = { ...defaultSeries, ...seriesConfig };
+    const processedSeries = { ...defaultSeries, ...seriesConfig };
     
-    if (!series.slug) {
-      console.error('Invalid series config, missing slug:', series);
+    if (!processedSeries.slug) {
+      console.error('Invalid series config, missing slug:', processedSeries);
       return;
     }
 
     // 处理每个分集
-    series.episodes = series.episodes.map(episode => {
+    processedSeries.episodes = processedSeries.episodes.map(episode => {
       const defaultEpisode = {
         title: '未命名分集',
         description: '暂无描述',
-        cover: series.cover,
+        cover: processedSeries.cover,
         qualities: []
       };
       
@@ -160,11 +204,12 @@ function parseVideoSeriesConfig() {
     });
 
     // 签名封面URL
-    if (series.cover) {
-      series.cover = signURL(series.cover);
+    if (processedSeries.cover) {
+      processedSeries.cover = signURL(processedSeries.cover);
     }
 
-    series[series.slug] = series;
+    // 将处理后的系列添加到目标对象
+    targetObj[processedSeries.slug] = processedSeries;
   }
 
   return series;
@@ -184,9 +229,9 @@ function parseSingleVideoConfig() {
       try {
         const parsedVideo = JSON.parse(config);
         if (Array.isArray(parsedVideo)) {
-          parsedVideo.forEach(video => processVideo(video));
+          parsedVideo.forEach(video => processVideo(video, videos));
         } else {
-          processVideo(parsedVideo);
+          processVideo(parsedVideo, videos);
         }
       } catch (error) {
         console.error('Failed to parse single video config:', error);
@@ -194,12 +239,12 @@ function parseSingleVideoConfig() {
     }
   });
 
-  function processVideo(videoConfig) {
+  function processVideo(videoConfig, targetObj) {
     const defaultVideo = {
       title: '未命名视频',
       description: '暂无描述',
       group: '默认分组',
-      cover: '/media/VideoVault-loop.webp',
+      cover: '/media/VideoVault-standby.webp',
       qualities: []
     };
 
@@ -223,7 +268,8 @@ function parseSingleVideoConfig() {
       video.cover = signURL(video.cover);
     }
 
-    videos[video.slug] = video;
+    // 将处理后的视频添加到目标对象
+    targetObj[video.slug] = video;
   }
 
   return videos;
