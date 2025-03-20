@@ -184,14 +184,9 @@
             object-fit: contain;
         }
 
-        .plyr--fullscreen {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9999;
-        }
+        
+
+        
 
         .plyr--fullscreen {
             position: fixed !important;
@@ -201,11 +196,13 @@
             height: 100vh !important;
             z-index: 9999;
         }
-
         .plyr--fullscreen .plyr__video-wrapper {
             width: 100% !important;
             height: 100% !important;
             min-height: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
         }
 
         .plyr--fullscreen video {
@@ -275,6 +272,23 @@
             e.preventDefault();
             return false;
         });
+
+        const player = new Plyr('video', {
+            controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen']
+        });
+        
+        // 强制重绘视频容器
+        const videoWrapper = document.querySelector('.video-container');
+        if(videoWrapper) {
+            videoWrapper.style.display = 'none';
+            videoWrapper.offsetHeight; // 触发重排
+            videoWrapper.style.display = 'block';
+        }
+        
+        // 初始化后重置播放器尺寸
+        setTimeout(() => {
+            player.resize();
+        }, 100);
     </script>
     <% } %>
 </head>
