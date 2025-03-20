@@ -170,19 +170,18 @@
 
         /* 全屏模式修复 */
         .plyr--fullscreen video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            max-width: 100% !important;
-            max-height: 100% !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: cover;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
 
         .plyr--fullscreen-active .plyr__video-wrapper {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000;
         }
 
         /* 页脚样式 */
