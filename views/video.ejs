@@ -1,7 +1,21 @@
 <div class="video-wrapper">
     <div class="video-container">
-        <video id="videoPlayer" controls controlsList="nodownload" oncontextmenu="return false;" draggable="false" poster="<%= video.cover %>">
-            <source src="<%= video.signedUrl %>" type="video/mp4">
+        <video id="videoPlayer" 
+               playsinline 
+               controls 
+               poster="<%= video.cover %>"
+               data-plyr='<%= JSON.stringify(plyrConfig) %>'
+               data-video='<%= JSON.stringify(video) %>'
+               data-is-series='<%= JSON.stringify(isSeries) %>'>
+            <% if (isSeries) { %>
+                <% video.episodes[0].qualities.forEach(quality => { %>
+                    <source src="<%= quality.url %>" type="video/mp4" size="<%= quality.height %>">
+                <% }); %>
+            <% } else { %>
+                <% video.qualities.forEach(quality => { %>
+                    <source src="<%= quality.url %>" type="video/mp4" size="<%= quality.height %>">
+                <% }); %>
+            <% } %>
             Your browser does not support the video tag.
         </video>
     </div>
@@ -10,13 +24,96 @@
 <div class="video-content">
     <h1><%= video.title %></h1>
     <p><%= video.description %></p>
+    
+    <% if (isSeries) { %>
+        <div class="episodes-list">
+            <h2>分集列表</h2>
+            <div class="episodes-grid">
+                <% video.episodes.forEach((episode, index) => { %>
+                    <div class="episode-item" data-episode-index="<%= index %>">
+                        <div class="episode-cover">
+                            <img src="<%= episode.cover %>" alt="<%= episode.title %>">
+                        </div>
+                        <div class="episode-info">
+                            <h3><%= episode.title %></h3>
+                            <p><%= episode.description %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    <% } %>
 </div>
+
+<style>
+.episodes-list {
+    margin-top: 2rem;
+}
+
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.episode-item {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.episode-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.episode-cover {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 比例 */
+    overflow: hidden;
+}
+
+.episode-cover img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.episode-info {
+    padding: 1rem;
+}
+
+.episode-info h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+}
+
+.episode-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const video = document.getElementById('videoPlayer');
+    // 从data属性获取配置
+    const videoElement = document.getElementById('videoPlayer');
+    const plyrConfig = JSON.parse(videoElement.dataset.plyr || '{}');
+    const videoData = JSON.parse(videoElement.dataset.video || '{}');
+    const isSeries = JSON.parse(videoElement.dataset.isSeries || 'false');
     
+    const player = new Plyr('#videoPlayer', plyrConfig);
+
+    // 视频加载完成后调整大小
     function adjustVideoSize() {
+        const video = document.getElementById('videoPlayer');
         if (!video.videoWidth || !video.videoHeight) return;
         
         const maxWidth = Math.min(1280, window.innerWidth);
@@ -41,9 +138,43 @@ document.addEventListener('DOMContentLoaded', function() {
         video.style.height = 'auto';
     }
 
-    video.addEventListener('loadedmetadata', adjustVideoSize);
+    player.on('loadedmetadata', adjustVideoSize);
     window.addEventListener('resize', adjustVideoSize);
     
-    if (video.readyState >= 1) adjustVideoSize();
+    if (player.media.readyState >= 1) adjustVideoSize();
+
+    // 处理分集切换
+    if (isSeries) {
+        const episodeItems = document.querySelectorAll('.episode-item');
+        
+        episodeItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                const episode = videoData.episodes[index];
+                const sources = episode.qualities.map(quality => 
+                    `<source src="${quality.url}" type="video/mp4" size="${quality.height}">`
+                ).join('');
+                
+                player.media.innerHTML = sources;
+                player.source = {
+                    type: 'video',
+                    sources: episode.qualities.map(quality => ({
+                        src: quality.url,
+                        type: 'video/mp4',
+                        size: quality.height
+                    }))
+                };
+                
+                // 更新视频封面
+                player.poster = episode.cover;
+                
+                // 更新标题和描述
+                document.querySelector('.video-content h1').textContent = episode.title;
+                document.querySelector('.video-content p').textContent = episode.description;
+                
+                // 播放新视频
+                player.play();
+            });
+        });
+    }
 });
 </script>

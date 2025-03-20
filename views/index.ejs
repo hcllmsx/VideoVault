@@ -1,18 +1,34 @@
-<% Object.entries(videoGroups).forEach(([groupName, videos]) => { %>
+<% Object.entries(videoSeries).forEach(([slug, series]) => { %>
     <div class="video-section">
-        <h2 class="group-header"><%= groupName %></h2>
+        <h2 class="group-header"><%= series.group %></h2>
         <div class="video-list">
-            <% videos.forEach(video => { %>
-                <div class="video-item">
-                    <div class="video-info">
-                        <h3 class="video-title"><%= video.title %></h3>
-                        <p class="video-description"><%= video.description %></p>
-                    </div>
-                    <a href="/<%= video.slug %>" class="watch-button">
-                        观看视频
-                    </a>
+            <div class="video-item">
+                <div class="video-info">
+                    <h3 class="video-title"><%= series.title %></h3>
+                    <p class="video-description"><%= series.description %></p>
+                    <p class="video-episodes-count">共 <%= series.episodes.length %> 集</p>
                 </div>
-            <% }); %>
+                <a href="/<%= series.slug %>" class="watch-button">
+                    观看合集
+                </a>
+            </div>
+        </div>
+    </div>
+<% }); %>
+
+<% Object.entries(singleVideos).forEach(([slug, video]) => { %>
+    <div class="video-section">
+        <h2 class="group-header"><%= video.group %></h2>
+        <div class="video-list">
+            <div class="video-item">
+                <div class="video-info">
+                    <h3 class="video-title"><%= video.title %></h3>
+                    <p class="video-description"><%= video.description %></p>
+                </div>
+                <a href="/<%= video.slug %>" class="watch-button">
+                    观看视频
+                </a>
+            </div>
         </div>
     </div>
 <% }); %>

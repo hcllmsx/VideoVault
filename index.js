@@ -65,6 +65,170 @@ function signURL(originURL) {
   }
 }
 
+// 解析Plyr配置
+function parsePlyrConfig() {
+  const defaultPlyrConfig = {
+    controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+    settings: ['captions', 'quality', 'speed'],
+    speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+    keyboard: { focused: true, global: true },
+    tooltips: { controls: true, seek: true },
+    theme: 'default',
+    autoplay: false,
+    loop: { active: false },
+    clickToPlay: true,
+    disableContextMenu: true,
+    loadSprite: true,
+    iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg',
+    blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
+    quality: {
+      default: 720,
+      options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
+    }
+  };
+
+  if (process.env.PLYR_CONFIG) {
+    try {
+      return { ...defaultPlyrConfig, ...JSON.parse(process.env.PLYR_CONFIG) };
+    } catch (error) {
+      console.error('Failed to parse PLYR_CONFIG:', error);
+    }
+  }
+  return defaultPlyrConfig;
+}
+
+// 解析视频合集配置
+function parseVideoSeriesConfig() {
+  const series = {};
+  
+  // 获取所有视频合集配置
+  const seriesConfigs = Object.keys(process.env)
+    .filter(key => key.startsWith('VIDEO_SERIES_'))
+    .map(key => process.env[key]);
+
+  seriesConfigs.forEach(config => {
+    if (config) {
+      try {
+        const parsedSeries = JSON.parse(config);
+        if (Array.isArray(parsedSeries)) {
+          parsedSeries.forEach(series => processSeries(series));
+        } else {
+          processSeries(parsedSeries);
+        }
+      } catch (error) {
+        console.error('Failed to parse video series config:', error);
+      }
+    }
+  });
+
+  function processSeries(seriesConfig) {
+    const defaultSeries = {
+      title: '未命名合集',
+      description: '暂无描述',
+      group: '默认分组',
+      cover: '/media/VideoVault-loop.webp',
+      episodes: []
+    };
+
+    const series = { ...defaultSeries, ...seriesConfig };
+    
+    if (!series.slug) {
+      console.error('Invalid series config, missing slug:', series);
+      return;
+    }
+
+    // 处理每个分集
+    series.episodes = series.episodes.map(episode => {
+      const defaultEpisode = {
+        title: '未命名分集',
+        description: '暂无描述',
+        cover: series.cover,
+        qualities: []
+      };
+      
+      const processedEpisode = { ...defaultEpisode, ...episode };
+      
+      // 处理视频质量选项
+      if (processedEpisode.qualities && processedEpisode.qualities.length > 0) {
+        processedEpisode.qualities = processedEpisode.qualities.map(quality => ({
+          ...quality,
+          url: signURL(quality.url)
+        }));
+      }
+      
+      return processedEpisode;
+    });
+
+    // 签名封面URL
+    if (series.cover) {
+      series.cover = signURL(series.cover);
+    }
+
+    series[series.slug] = series;
+  }
+
+  return series;
+}
+
+// 解析单集视频配置
+function parseSingleVideoConfig() {
+  const videos = {};
+  
+  // 获取所有单集视频配置
+  const videoConfigs = Object.keys(process.env)
+    .filter(key => key.startsWith('VIDEO_SINGLE_'))
+    .map(key => process.env[key]);
+
+  videoConfigs.forEach(config => {
+    if (config) {
+      try {
+        const parsedVideo = JSON.parse(config);
+        if (Array.isArray(parsedVideo)) {
+          parsedVideo.forEach(video => processVideo(video));
+        } else {
+          processVideo(parsedVideo);
+        }
+      } catch (error) {
+        console.error('Failed to parse single video config:', error);
+      }
+    }
+  });
+
+  function processVideo(videoConfig) {
+    const defaultVideo = {
+      title: '未命名视频',
+      description: '暂无描述',
+      group: '默认分组',
+      cover: '/media/VideoVault-loop.webp',
+      qualities: []
+    };
+
+    const video = { ...defaultVideo, ...videoConfig };
+    
+    if (!video.slug) {
+      console.error('Invalid video config, missing slug:', video);
+      return;
+    }
+
+    // 处理视频质量选项
+    if (video.qualities && video.qualities.length > 0) {
+      video.qualities = video.qualities.map(quality => ({
+        ...quality,
+        url: signURL(quality.url)
+      }));
+    }
+
+    // 签名封面URL
+    if (video.cover) {
+      video.cover = signURL(video.cover);
+    }
+
+    videos[video.slug] = video;
+  }
+
+  return videos;
+}
+
 // 设置EJS模板引擎和布局
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -83,7 +247,27 @@ function parseVideosConfig() {
       title: '未命名视频',
       description: '暂无描述',
       group: '默认分组',
-      cover: '/media/VideoVault-standby.webp' // 默认封面（相对路径，不需要签名）
+      cover: '/media/VideoVault-standby.webp', // 默认封面
+      // 添加Plyr默认配置
+      plyr: {
+        controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+        settings: ['captions', 'quality', 'speed'],
+        speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+        keyboard: { focused: true, global: true },
+        tooltips: { controls: true, seek: true },
+        theme: 'default',
+        autoplay: false,
+        loop: { active: false },
+        clickToPlay: true,
+        disableContextMenu: true,
+        loadSprite: true,
+        iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg',
+        blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
+        quality: {
+          default: 720,
+          options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
+        }
+      }
     };
     const video = { ...defaultVideo, ...videoConfig };
     if (!video.url || !video.slug) {
@@ -135,20 +319,26 @@ function parseVideosConfig() {
 
 // 首页路由
 app.get('/', (req, res) => {
-  const videoGroups = parseVideosConfig();
+  const videoSeries = parseVideoSeriesConfig();
+  const singleVideos = parseSingleVideoConfig();
+  const plyrConfig = parsePlyrConfig();
+  
   let siteBrand = null;
   if (process.env.SITE_BRAND) {
     try {
       siteBrand = JSON.parse(process.env.SITE_BRAND);
       if (siteBrand.logo) {
-        siteBrand.logo = signURL(siteBrand.logo); // 对品牌 Logo 链接进行鉴权
+        siteBrand.logo = signURL(siteBrand.logo);
       }
     } catch (error) {
       console.error('Failed to parse SITE_BRAND:', error);
     }
   }
+
   res.render('index', { 
-    videoGroups,
+    videoSeries,
+    singleVideos,
+    plyrConfig,
     domain: process.env.DOMAIN || req.get('host'),
     siteBrand
   });
@@ -156,27 +346,33 @@ app.get('/', (req, res) => {
 
 // 视频页面路由
 app.get('/:videoSlug', (req, res) => {
-  const videoGroups = parseVideosConfig();
-  let foundVideo = null;
+  const videoSeries = parseVideoSeriesConfig();
+  const singleVideos = parseSingleVideoConfig();
+  const plyrConfig = parsePlyrConfig();
   
-  // 在所有分组中查找视频
-  foundVideo = Object.values(videoGroups)
-    .flat()
-    .find(video => video.slug === req.params.videoSlug);
+  let foundVideo = null;
+  let isSeries = false;
+  
+  // 先查找单集视频
+  if (singleVideos[req.params.videoSlug]) {
+    foundVideo = singleVideos[req.params.videoSlug];
+  }
+  // 再查找视频合集
+  else if (videoSeries[req.params.videoSlug]) {
+    foundVideo = videoSeries[req.params.videoSlug];
+    isSeries = true;
+  }
   
   if (!foundVideo) {
     return res.status(404).render('404');
   }
-  
-  // 生成带鉴权的视频URL
-  const signedVideoUrl = signURL(foundVideo.url);
   
   let siteBrand = null;
   if (process.env.SITE_BRAND) {
     try {
       siteBrand = JSON.parse(process.env.SITE_BRAND);
       if (siteBrand.logo) {
-        siteBrand.logo = signURL(siteBrand.logo); // 对品牌 Logo 链接进行鉴权
+        siteBrand.logo = signURL(siteBrand.logo);
       }
     } catch (error) {
       console.error('Failed to parse SITE_BRAND:', error);
@@ -184,10 +380,9 @@ app.get('/:videoSlug', (req, res) => {
   }
 
   res.render('video', { 
-    video: {
-      ...foundVideo,
-      signedUrl: signedVideoUrl
-    },
+    video: foundVideo,
+    isSeries,
+    plyrConfig,
     refererDomain: process.env.DOMAIN,
     title: foundVideo.title,
     isVideoPage: true,
