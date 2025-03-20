@@ -353,19 +353,48 @@
                 }
             });
 
-            // 单集视频初始化后立即触发
-            if (document.querySelector('#single-video-init')) {
-                requestAnimationFrame(() => {
-                    videoWrapper.style.width = '100%';
-                    videoWrapper.style.height = 'auto';
-                    videoWrapper.style.transform = 'translateZ(0)';
-                    player.resize();
-                    // 添加边界尺寸同步
-                    const rect = videoWrapper.getBoundingClientRect();
-                    videoWrapper.style.minWidth = `${rect.width}px`;
-                    videoWrapper.style.minHeight = `${rect.height}px`;
+            // 全局视频初始化逻辑
+            const initVideoLayout = () => {
+                videoWrapper.style.width = '100%';
+                videoWrapper.style.height = 'auto';
+                videoWrapper.style.transform = 'translateZ(0)';
+                player.resize();
+            };
+
+            // 统一初始化入口
+            // 统一初始化入口
+            player.on('ready', () => {
+                console.log('视频播放器初始化完成');
+                videoWrapper.dataset.playerReady = 'true';
+                initVideoLayout();
+                new ResizeObserver(initVideoLayout).observe(videoWrapper);
+            });
+
+            // 基础初始化方案
+            const setupVideoPlayer = () => {
+                // 设置基础尺寸
+                videoWrapper.style.width = '100%';
+                videoWrapper.style.height = 'auto';
+                
+                // 初始化播放器
+                player.source = videoSources;
+                player.resize();
+                
+                // 全屏事件处理
+                player.on('enterfullscreen exitfullscreen', () => {
+                    requestAnimationFrame(() => player.resize());
                 });
+            };
+
+            // 统一初始化入口
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupVideoPlayer);
+            } else {
+                setupVideoPlayer();
             }
+
+            // 处理动态加载内容
+            document.addEventListener('video-loaded', initVideoLayout);
         </script>
         <% } %>
 </head>
