@@ -1,7 +1,4 @@
 <div class="video-wrapper">
-    <div id="mobileFullscreenBtn" class="mobile-fullscreen-btn">
-        <i class="fas fa-expand"></i>
-    </div>
     <div class="video-container">
         <video id="videoPlayer" 
                playsinline 
@@ -53,28 +50,8 @@
 </div>
 
 <style>
-/* 移动设备全屏按钮 */
-.mobile-fullscreen-btn {
-    display: none;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    color: white;
-    text-align: center;
-    line-height: 40px;
-    z-index: 100;
-    cursor: pointer;
-}
-
 /* 移动设备全屏支持 */
 @media (max-width: 768px) {
-    .mobile-fullscreen-btn {
-        display: block;
-    }
     
     .plyr--fullscreen-active,
     .plyr--fullscreen {
@@ -239,31 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始化时启用iOS全屏支持
     enableIOSFullscreen();
     
-    // 添加移动设备专用全屏按钮事件
-    const mobileFullscreenBtn = document.getElementById('mobileFullscreenBtn');
-    if (mobileFullscreenBtn && isMobile) {
-        mobileFullscreenBtn.addEventListener('click', function() {
-            // 触发原生全屏
-            const video = player.elements.container;
-            
-            if (video.requestFullscreen) {
-                video.requestFullscreen();
-            } else if (video.webkitRequestFullscreen) {
-                video.webkitRequestFullscreen();
-            } else if (player.media.webkitEnterFullscreen) {
-                player.media.webkitEnterFullscreen();
-            } else if (video.msRequestFullscreen) {
-                video.msRequestFullscreen();
-            }
-            
-            // 尝试锁定横屏
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => {
-                    console.log('设备不支持锁定屏幕方向');
-                });
-            }
-        });
-    }
+    // 移除了移动设备专用全屏按钮事件，使用Plyr内置全屏功能
     
     // 视频加载完成后调整大小
     function adjustVideoSize() {
