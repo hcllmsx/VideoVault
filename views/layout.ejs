@@ -303,16 +303,61 @@
                 return false;
             });
 
+            // 检测是否为移动设备
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // 创建Plyr播放器实例
             const player = new Plyr('video', {
-                controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen']
+                controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+                fullscreen: { 
+                    enabled: true,
+                    fallback: true,
+                    iosNative: true // 在iOS设备上使用原生全屏
+                }
             });
+            
+            // 处理移动设备全屏
+            const requestFullscreenForMobile = () => {
+                const video = player.elements.container;
+                
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.webkitEnterFullscreen) { // iOS支持
+                    video.webkitEnterFullscreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            };
 
             // 获取视频容器
             const videoWrapper = document.querySelector('.video-container');
             const videoElement = document.querySelector('video');
             
+            // 处理移动设备横屏
+            const handleOrientationChange = () => {
+                if (isMobile && player.fullscreen.active) {
+                    // 强制横屏时重新调整视频尺寸
+                    setTimeout(() => {
+                        player.resize();
+                        videoElement.style.width = '100%';
+                        videoElement.style.height = '100%';
+                        videoElement.style.objectFit = 'contain';
+                    }, 100);
+                }
+            };
+            
+            // 监听屏幕方向变化
+            window.addEventListener('orientationchange', handleOrientationChange);
+            
             // 全屏模式处理函数
             const handleFullscreenChange = () => {
+                // 如果是移动设备，尝试使用原生全屏
+                if (isMobile && player.fullscreen.active) {
+                    requestFullscreenForMobile();
+                }
+                
                 if (document.fullscreenElement || 
                     document.webkitFullscreenElement || 
                     document.mozFullScreenElement ||
@@ -395,6 +440,19 @@
             
             // 全屏事件处理
             player.on('enterfullscreen', () => {
+                if (isMobile) {
+                    // 移动设备使用原生全屏
+                    requestFullscreenForMobile();
+                    
+                    // 尝试锁定横屏方向
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(() => {
+                            // 某些设备可能不支持锁定方向，忽略错误
+                            console.log('设备不支持锁定屏幕方向');
+                        });
+                    }
+                }
+                
                 videoElement.style.width = '100%';
                 videoElement.style.height = '100%';
                 videoElement.style.objectFit = 'contain';
@@ -404,7 +462,20 @@
             });
             
             player.on('exitfullscreen', () => {
+                if (isMobile) {
+                    // 退出全屏时解除屏幕方向锁定
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                }
                 setTimeout(initVideoLayout, 100);
+            });
+            
+            // 监听播放开始，为iOS设备准备
+            player.on('play', () => {
+                if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    videoElement.webkitEnterFullscreen = videoElement.webkitEnterFullscreen || function() {};
+                }
             });
             
             // 初始化播放器
