@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 const signedURLCache = new Map(); // 缓存已鉴权的链接
 
 // 生成带有鉴权的URL
-function signURL(originURL) {
+const signURL = (originURL) => {
   // 如果是相对路径，不进行签名
   if (originURL.startsWith('/')) {
     return originURL;
@@ -66,7 +66,7 @@ function signURL(originURL) {
 }
 
 // 解析Plyr配置
-function parsePlyrConfig() {
+const parsePlyrConfig = () => {
   const defaultPlyrConfig = {
     controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
     settings: ['captions', 'quality', 'speed'],
@@ -142,7 +142,7 @@ function parsePlyrConfig() {
 }
 
 // 解析视频合集配置
-function parseVideoSeriesConfig() {
+const parseVideoSeriesConfig = () => {
   const series = {};
   
   // 获取所有视频合集配置
@@ -216,7 +216,7 @@ function parseVideoSeriesConfig() {
 }
 
 // 解析单集视频配置
-function parseSingleVideoConfig() {
+const parseSingleVideoConfig = () => {
   const videos = {};
   
   // 获取所有单集视频配置
@@ -363,12 +363,8 @@ function parseVideosConfig() {
   return groups;
 }
 
-// 首页路由
-app.get('/', (req, res) => {
-  const videoSeries = parseVideoSeriesConfig();
-  const singleVideos = parseSingleVideoConfig();
-  const plyrConfig = parsePlyrConfig();
-  
+// 解析站点品牌信息
+const parseSiteBrand = () => {
   let siteBrand = null;
   if (process.env.SITE_BRAND) {
     try {
@@ -380,6 +376,17 @@ app.get('/', (req, res) => {
       console.error('Failed to parse SITE_BRAND:', error);
     }
   }
+  return siteBrand;
+};
+
+// 首页路由
+app.get('/', async (req, res) => {
+  const [videoSeries, singleVideos, plyrConfig, siteBrand] = await Promise.all([
+    parseVideoSeriesConfig(),
+    parseSingleVideoConfig(),
+    parsePlyrConfig(),
+    parseSiteBrand()
+  ]);
 
   res.render('index', { 
     videoSeries,
@@ -391,10 +398,13 @@ app.get('/', (req, res) => {
 });
 
 // 视频页面路由
-app.get('/:videoSlug', (req, res) => {
-  const videoSeries = parseVideoSeriesConfig();
-  const singleVideos = parseSingleVideoConfig();
-  const plyrConfig = parsePlyrConfig();
+app.get('/:videoSlug', async (req, res) => {
+  const [videoSeries, singleVideos, plyrConfig, siteBrand] = await Promise.all([
+    parseVideoSeriesConfig(),
+    parseSingleVideoConfig(),
+    parsePlyrConfig(),
+    parseSiteBrand()
+  ]);
   
   let foundVideo = null;
   let isSeries = false;
@@ -411,18 +421,6 @@ app.get('/:videoSlug', (req, res) => {
   
   if (!foundVideo) {
     return res.status(404).render('404');
-  }
-  
-  let siteBrand = null;
-  if (process.env.SITE_BRAND) {
-    try {
-      siteBrand = JSON.parse(process.env.SITE_BRAND);
-      if (siteBrand.logo) {
-        siteBrand.logo = signURL(siteBrand.logo);
-      }
-    } catch (error) {
-      console.error('Failed to parse SITE_BRAND:', error);
-    }
   }
 
   res.render('video', { 
