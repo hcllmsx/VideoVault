@@ -1,5 +1,8 @@
+# 忽略以下文件夹
 node_modules/
+.idea/
+.vercel/
+
+# 忽略以下文件
 .env
-.env.local
 .DS_Store
-.vercel
