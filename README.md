@@ -205,3 +205,7 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
 2. 在Vercel中导入项目
 3. 配置环境变量
 4. 部署完成后，设置自定义域名
+
+## 鸣谢
+
+[文心快码（Baidu Comate）](https://comate.baidu.com/zh)Zulu智能体
