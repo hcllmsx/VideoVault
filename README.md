@@ -178,11 +178,13 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
    git clone https://github.com/hcllmsx/VideoVault.git
    cd VideoVault
    ```
+
 2. 安装依赖：
 
    ```bash
    npm install
    ```
+
 3. 创建 .env 文件并配置环境变量：
 
    ```bash
@@ -193,6 +195,7 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
    VIDEO_SINGLE_1={"slug":"my-video","group":"电影","title":"我的电影","description":"这是一部电影","cover":"https://example.com/cover.jpg","qualities":[...]}
    PLYR_CONFIG={"theme":"dark","controls":[...]}
    ```
+
 4. 启动开发服务器：
 
    ```bash
