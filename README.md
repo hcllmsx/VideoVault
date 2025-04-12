@@ -168,40 +168,6 @@ VideoVault 是一个基于[Vercel](https://vercel.com/home)，需要配合[123�
 }
 ```
 
-## 本地开发
-
-> 如果你在123云盘后台设置了Referer鉴权，本地开发会无法播放视频
-
-1. 克隆仓库：
-
-   ```bash
-   git clone https://github.com/hcllmsx/VideoVault.git
-   cd VideoVault
-   ```
-
-2. 安装依赖：
-
-   ```bash
-   npm install
-   ```
-
-3. 创建 .env 文件并配置环境变量：
-
-   ```bash
-   UID=你的123云盘UID
-   AUTH_KEY=你的123云盘URL鉴权密钥
-   DOMAIN=你的123云盘Referer鉴权域名
-   VIDEO_SERIES_1={"slug":"my-series","group":"电视剧","title":"我的电视剧","description":"这是一部电视剧","cover":"https://example.com/cover.jpg","episodes":[...]}
-   VIDEO_SINGLE_1={"slug":"my-video","group":"电影","title":"我的电影","description":"这是一部电影","cover":"https://example.com/cover.jpg","qualities":[...]}
-   PLYR_CONFIG={"theme":"dark","controls":[...]}
-   ```
-
-4. 启动开发服务器：
-
-   ```bash
-   npm run dev
-   ```
-
 ## 部署到Vercel
 
 1. Fork 这个仓库到你的GitHub账号
